@@ -13,10 +13,10 @@ Action Recognition? A New Model and the Kinetics
 Dataset](https://arxiv.org/abs/1705.07750)" by Joao Carreira and Andrew
 Zisserman.
 
-This code is based on Deepmind's [Kinetics-I3D](https://github.com/deepmind/kinetics-i3d). Including PyTorch versions of their models.
+This code is based on Deepmind's [Kinetics-I3D](https://githubj.com/deepmind/kinetics-i3d). Including PyTorch versions of their models.
 
 ## Download
-[Charades_v1_rgb](http://ai2-website.s3.amazonaws.com/data/Charades_v1_rgb.tar)
+[Charades_v1_rgb](https://ai2-public-datasets.s3-us-west-2.amazonaws.com/charades/Charades_v1_rgb.tar)
 
 [Vidor](http://lms.comp.nus.edu.sg/research/dataset.html)
 
@@ -31,7 +31,7 @@ These models were pretrained on imagenet and kinetics (see [Kinetics-I3D](https:
 [train_i3d.py](train_i3d.py) 
 contains the code to fine-tune I3D based on the details in the paper and obtained from the authors.
 Specifically, this version follows the settings to fine-tune on the 
-[Charades](allenai.org/plato/charades/) dataset based on the author's implementation 
+[Charades](https://www.allenai.org/plato/charades/) dataset based on the author's implementation 
 that won the Charades 2017 challenge. 
 The charades fine-tuned RGB and Flow I3D models are available in the model directory 
 (rgb_charades.pt and flow_charades.pt).

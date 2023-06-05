@@ -9,6 +9,9 @@ import torch
 import torch.utils.data as data_utl
 from torchvision import transforms
 import videotransforms
+import concurrent.futures
+
+from FlowUnderAttack.flow_library.flow_IO import readFlowFile
 
 
 def video_to_tensor(pic):
@@ -41,21 +44,25 @@ def load_rgb_frames(image_dir, vid, start, num):
 def load_flow_frames(image_dir, vid, start, num):
     frames = []
     for i in range(start, start + num):
-        imgx = cv2.imread(os.path.join(image_dir, vid, vid + '-' + str(i).zfill(6) + 'x.jpg'), cv2.IMREAD_GRAYSCALE)
-        imgy = cv2.imread(os.path.join(image_dir, vid, vid + '-' + str(i).zfill(6) + 'y.jpg'), cv2.IMREAD_GRAYSCALE)
+        img = readFlowFile(os.path.join(image_dir, vid, vid + '-' + str(i).zfill(6) + '.flo')) # [H, W, 2]
+        # imgx = cv2.imread(os.path.join(image_dir, vid, vid + '-' + str(i).zfill(6) + 'x.jpg'), cv2.IMREAD_GRAYSCALE)
+        # imgy = cv2.imread(os.path.join(image_dir, vid, vid + '-' + str(i).zfill(6) + 'y.jpg'), cv2.IMREAD_GRAYSCALE)
 
-        w, h = imgx.shape
+        w, h, c = img.shape
+        assert c == 2
         if w < 224 or h < 224:
             d = 224. - min(w, h)
             sc = 1 + d / min(w, h)
-            imgx = cv2.resize(imgx, dsize=(0, 0), fx=sc, fy=sc)
-            imgy = cv2.resize(imgy, dsize=(0, 0), fx=sc, fy=sc)
+            # imgx = cv2.resize(imgx, dsize=(0, 0), fx=sc, fy=sc)
+            # imgy = cv2.resize(imgy, dsize=(0, 0), fx=sc, fy=sc)
+            img = cv2.resize(img, dsize=(0, 0), fx=sc, fy=sc)
 
-        imgx = (imgx / 255.) * 2 - 1
-        imgy = (imgy / 255.) * 2 - 1
-        img = np.asarray([imgx, imgy]).transpose([1, 2, 0])
+        # imgx = (imgx / 255.) * 2 - 1
+        # imgy = (imgy / 255.) * 2 - 1
+        img = img/abs(img).max()
+        # img = np.asarray([imgx, imgy]).transpose([1, 2, 0]) #  224 x 224 x 2
         frames.append(img)
-    return np.asarray(frames, dtype=np.float32)
+    return np.asarray(frames, dtype=np.float32) # T x 224 x 224 x 2
 
 
 def make_dataset(split_file, split, root, mode, num_classes=157):
@@ -92,7 +99,7 @@ def make_dataset(split_file, split, root, mode, num_classes=157):
 
 class Charades(data_utl.Dataset):
 
-    def __init__(self, split_file, split, root, mode, transforms=None):
+    def __init__(self, split_file, split, root, mode, transforms=None, num_workers=1):
 
         self.data = make_dataset(split_file, split, root, mode)
         self.split_file = split_file
@@ -115,6 +122,7 @@ class Charades(data_utl.Dataset):
             imgs = load_rgb_frames(self.root, vid, start_f, 64)
         else:
             imgs = load_flow_frames(self.root, vid, start_f, 64)
+
         label = label[:, start_f:start_f + 64]
 
         imgs = self.transforms(imgs)

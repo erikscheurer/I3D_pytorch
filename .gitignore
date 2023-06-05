@@ -105,3 +105,10 @@ ENV/
 frames/
 
 VideoData/
+
+
+*.jpg
+*.png
+data/
+runs/
+.vscode/
